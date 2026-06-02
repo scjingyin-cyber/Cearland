@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语言典藏</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Noto+Serif+SC:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-main: #f8f6f1;
+            --bg-secondary: #eae6dd;
+            --text-primary: #2a2520;
+            --text-secondary: #5a5047;
+            --accent: #8b6f47;
+            --accent-light: #b89968;
+            --border: #d4cfc4;
+            --shadow: rgba(42, 37, 32, 0.08);
+            --highlight: #fff9ed;
+        }
+
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.8;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 111, 71, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 111, 71, 0.02) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 30px;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .main-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 rgba(139, 111, 71, 0.1);
+            position: relative;
+            display: inline-block;
+        }
+
+        .main-title::before,
+        .main-title::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 2px;
+            background: var(--accent);
+            top: 50%;
+        }
+
+        .main-title::before {
+            left: -80px;
+        }
+
+        .main-title::after {
+            right: -80px;
+        }
+
+        .countdown {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.15em;
+            margin-top: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .countdown-days {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Search Box */
+        .search-section {
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        .search-mode {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-family: 'Crimson Pro', serif;
+            letter-spacing: 0.1em;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 60px 20px 25px;
+            font-size: 1.1rem;
+            font-family: 'Crimson Pro', serif;
+            border: 2px solid var(--border);
+            background: white;
+            color: var(--text-primary);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 6px 30px rgba(139, 111, 71, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 1.3rem;
+        }
+
+        .search-results {
+            margin-top: 30px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px var(--shadow);
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .search-result-item {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-secondary);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-word {
+            font-size: 1.3rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .result-translation {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Function Buttons */
+        .functions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .function-btn {
+            padding: 15px 35px;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px var(--shadow);
+            letter-spacing: 0.1em;
+        }
+
+        .function-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(139, 111, 71, 0.25);
+        }
+
+        .function-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 37, 32, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: var(--bg-main);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            font-size: 2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--accent);
+        }
+
+        /* Add Word Form */
+        .word-form {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        .word-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-family: 'Crimson Pro', serif;
+            border: 2px solid var(--border);
+            background: white;
+            color: var(--text-primary);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .word-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px rgba(139, 111, 71, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .submit-btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 111, 71, 0.3);
+        }
+
+        /* Dictionary View */
+        .alphabet-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .letter-btn {
+            width: 40px;
+            height: 40px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .letter-btn:hover,
+        .letter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .word-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .word-item {
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .word-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .word-pair {
+            flex: 1;
+        }
+
+        .word-created {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .word-chinese {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .delete-btn {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c94f4f;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar */
+        .word-list::-webkit-scrollbar,
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .word-list::-webkit-scrollbar-track,
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        .word-list::-webkit-scrollbar-thumb,
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5rem;
+                letter-spacing: 0.2em;
+            }
+
+            .main-title::before,
+            .main-title::after {
+                width: 30px;
+            }
+
+            .main-title::before {
+                left: -40px;
+            }
+
+            .main-title::after {
+                right: -40px;
+            }
+
+            .word-form {
+                flex-direction: column;
+            }
+
+            .functions {
+                flex-direction: column;
+            }
+
+            .function-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="main-title">静待启封</h1>
+            <div class="countdown" id="countdown">距离熔炉重启还有 <span class="countdown-days">0</span> 天</div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-mode" id="searchMode">中文 → 兰森语</div>
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="输入词汇进行搜索..."
+                >
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <!-- Function Buttons -->
+        <div class="functions">
+            <button class="function-btn" onclick="openAddModal()">添加新词汇</button>
+            <button class="function-btn" onclick="openDictionaryModal()">词典浏览</button>
+            <button class="function-btn" onclick="toggleSearchMode()">切换搜索</button>
+            <button class="function-btn" onclick="exportDictionary()">导出Markdown</button>
+            <button class="function-btn" onclick="document.getElementById('importFile').click()">导入词典</button>
+            <input type="file" id="importFile" accept=".json,.txt,.md" style="display: none;" onchange="importDictionary(event)">
+        </div>
+    </div>
+
+    <!-- Add Word Modal -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">添加新词汇</h2>
+                <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
+            </div>
+            <div class="word-form">
+                <div class="input-group">
+                    <label class="input-label">中文</label>
+                    <input type="text" class="word-input" id="chineseInput" placeholder="输入中文词汇">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">兰森语</label>
+                    <input type="text" class="word-input" id="newLangInput" placeholder="输入兰森语词汇">
+                </div>
+            </div>
+            <button class="submit-btn" onclick="addWord()">确认添加</button>
+        </div>
+    </div>
+
+    <!-- Dictionary Modal -->
+    <div class="modal" id="dictionaryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">词典浏览</h2>
+                <button class="close-btn" onclick="closeModal('dictionaryModal')">&times;</button>
+            </div>
+            <div class="alphabet-nav" id="alphabetNav"></div>
+            <div class="word-list" id="wordList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let dictionary = {};
+        const markdownPath = '../data/dictionary.md';
+        const localDraftKey = 'caerland-dictionary-draft-v2';
+        const readOnly = new URLSearchParams(window.location.search).get('readonly') === '1';
+        let searchMode = 'cn-to-new'; // 'cn-to-new' or 'new-to-cn'
+
+        async function loadDictionary() {
+            try {
+                const draft = !readOnly ? localStorage.getItem(localDraftKey) : null;
+                const saved = draft ? JSON.parse(draft) : await fetchMarkdownJson(markdownPath, {});
+                dictionary = saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+            } catch (error) {
+                console.error(error);
+                dictionary = {};
+            }
+        }
+
+        function saveDictionary() {
+            if (readOnly) return;
+            localStorage.setItem(localDraftKey, JSON.stringify(dictionary));
+        }
+
+        async function fetchMarkdownJson(url, fallback) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`无法读取 ${url}`);
+            return parseMarkdownJson(await response.text(), fallback);
+        }
+
+        function parseMarkdownJson(markdown, fallback) {
+            const match = markdown.match(/```json\s*([\s\S]*?)\s*```/i);
+            if (!match) return fallback;
+            return JSON.parse(match[1]);
+        }
+
+        function markdownFor(title, data) {
+            return `# ${title}\n\nStatic data for GitHub Pages.\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n`;
+        }
+
+        function downloadMarkdown(fileName, title, data) {
+            const blob = new Blob([markdownFor(title, data)], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Calculate countdown to 3150-12-31
+        function updateCountdown() {
+            const targetDate = new Date('3150-12-31T23:59:59');
+            const now = new Date();
+            const diffTime = targetDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            document.querySelector('.countdown-days').textContent = diffDays.toLocaleString();
+        }
+
+        // Update countdown on page load
+        updateCountdown();
+
+        // Initialize alphabet navigation
+        function initAlphabetNav() {
+            const alphabetNav = document.getElementById('alphabetNav');
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            
+            alphabetNav.innerHTML = alphabet.map(letter => 
+                `<button class="letter-btn" onclick="filterByLetter('${letter}')">${letter}</button>`
+            ).join('');
+        }
+
+        // Open modals
+        function openAddModal() {
+            if (readOnly) return;
+            document.getElementById('addModal').classList.add('active');
+            document.getElementById('chineseInput').focus();
+        }
+
+        function openDictionaryModal() {
+            document.getElementById('dictionaryModal').classList.add('active');
+            initAlphabetNav();
+            displayAllWords();
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (modalId === 'addModal') {
+                document.getElementById('chineseInput').value = '';
+                document.getElementById('newLangInput').value = '';
+            }
+        }
+
+        // Add new word
+        async function addWord() {
+            if (readOnly) return;
+            const chinese = document.getElementById('chineseInput').value.trim();
+            const newLang = document.getElementById('newLangInput').value.trim();
+
+            if (!chinese || !newLang) {
+                alert('请填写完整的词汇信息');
+                return;
+            }
+
+            // Store word (using Chinese as key for cn-to-new lookup)
+            if (!dictionary[chinese]) {
+                dictionary[chinese] = newLang;
+                saveDictionary();
+                
+                // Clear inputs
+                document.getElementById('chineseInput').value = '';
+                document.getElementById('newLangInput').value = '';
+                
+                alert('词汇添加成功!');
+            } else {
+                if (confirm('该中文词汇已存在,是否覆盖?')) {
+                    dictionary[chinese] = newLang;
+                    saveDictionary();
+                    document.getElementById('chineseInput').value = '';
+                    document.getElementById('newLangInput').value = '';
+                    alert('词汇更新成功!');
+                }
+            }
+        }
+
+        // Toggle search mode
+        function toggleSearchMode() {
+            searchMode = searchMode === 'cn-to-new' ? 'new-to-cn' : 'cn-to-new';
+            const modeText = searchMode === 'cn-to-new' ? '中文 → 兰森语' : '兰森语 → 中文';
+            const placeholder = searchMode === 'cn-to-new' ? '输入中文词汇进行搜索...' : '输入兰森语词汇进行搜索...';
+            
+            document.getElementById('searchMode').textContent = modeText;
+            document.getElementById('searchInput').placeholder = placeholder;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').classList.remove('active');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.trim().toLowerCase();
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (!query) {
+                resultsDiv.classList.remove('active');
+                return;
+            }
+
+            let results = [];
+
+            if (searchMode === 'cn-to-new') {
+                // Search Chinese to New Language
+                results = Object.entries(dictionary).filter(([cn, newLang]) => 
+                    cn.toLowerCase().includes(query)
+                );
+            } else {
+                // Search New Language to Chinese
+                results = Object.entries(dictionary).filter(([cn, newLang]) => 
+                    newLang.toLowerCase().includes(query)
+                );
+            }
+
+            if (results.length > 0) {
+                resultsDiv.innerHTML = results.map(([cn, newLang]) => {
+                    if (searchMode === 'cn-to-new') {
+                        return `
+                            <div class="search-result-item">
+                                <div class="result-word">${newLang}</div>
+                                <div class="result-translation">${cn}</div>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="search-result-item">
+                                <div class="result-word">${cn}</div>
+                                <div class="result-translation">${newLang}</div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+                resultsDiv.classList.add('active');
+            } else {
+                resultsDiv.innerHTML = '<div class="empty-state">未找到匹配的词汇</div>';
+                resultsDiv.classList.add('active');
+            }
+        });
+
+        // Display all words
+        function displayAllWords() {
+            const wordList = document.getElementById('wordList');
+            const entries = Object.entries(dictionary).sort((a, b) => 
+                a[1].localeCompare(b[1])
+            );
+
+            if (entries.length === 0) {
+                wordList.innerHTML = '<div class="empty-state">词典为空,请添加新词汇</div>';
+                return;
+            }
+
+            wordList.innerHTML = entries.map(([cn, newLang]) => `
+                <div class="word-item">
+                    <div class="word-pair">
+                        <div class="word-created">${newLang}</div>
+                        <div class="word-chinese">${cn}</div>
+                    </div>
+                    ${readOnly ? '' : `<button class="delete-btn" onclick="deleteWord('${cn.replace(/'/g, "\\'")}')">删除</button>`}
+                </div>
+            `).join('');
+        }
+
+        // Filter by letter
+        function filterByLetter(letter) {
+            const wordList = document.getElementById('wordList');
+            const entries = Object.entries(dictionary).filter(([cn, newLang]) => 
+                newLang.toUpperCase().startsWith(letter)
+            ).sort((a, b) => a[1].localeCompare(b[1]));
+
+            // Highlight active letter
+            document.querySelectorAll('.letter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === letter) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if (entries.length === 0) {
+                wordList.innerHTML = `<div class="empty-state">没有以 ${letter} 开头的词汇</div>`;
+                return;
+            }
+
+            wordList.innerHTML = entries.map(([cn, newLang]) => `
+                <div class="word-item">
+                    <div class="word-pair">
+                        <div class="word-created">${newLang}</div>
+                        <div class="word-chinese">${cn}</div>
+                    </div>
+                    ${readOnly ? '' : `<button class="delete-btn" onclick="deleteWord('${cn.replace(/'/g, "\\'")}')">删除</button>`}
+                </div>
+            `).join('');
+        }
+
+        // Delete word
+        async function deleteWord(chinese) {
+            if (readOnly) return;
+            if (confirm('确定要删除这个词汇吗?')) {
+                delete dictionary[chinese];
+                saveDictionary();
+                displayAllWords();
+            }
+        }
+
+        // Export dictionary (JSON or TXT)
+        function exportDictionary() {
+            if (readOnly) return;
+            saveDictionary();
+            downloadMarkdown('dictionary.md', 'Dictionary Data', dictionary);
+        }
+
+        // Import dictionary (supports both JSON and TXT)
+        function importDictionary(event) {
+            if (readOnly) return;
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                try {
+                    let importedData = {};
+                    
+                    if (fileName.endsWith('.md')) {
+                        importedData = parseMarkdownJson(e.target.result, {});
+                        if (typeof importedData !== 'object' || Array.isArray(importedData)) {
+                            alert('Markdown文件格式错误,请选择正确的词典文件');
+                            return;
+                        }
+                    } else if (fileName.endsWith('.json')) {
+                        // Import JSON format
+                        importedData = JSON.parse(e.target.result);
+                        
+                        if (typeof importedData !== 'object' || Array.isArray(importedData)) {
+                            alert('JSON文件格式错误,请选择正确的词典文件');
+                            return;
+                        }
+                    } else if (fileName.endsWith('.txt')) {
+                        // Import TXT format: 中文|兰森语
+                        const lines = e.target.result.split('\n');
+                        
+                        for (let line of lines) {
+                            line = line.trim();
+                            // Skip empty lines and header lines
+                            if (!line || line.startsWith('=') || line.startsWith('兰森语词典') || 
+                                line.startsWith('导出时间') || line.startsWith('词汇总数')) {
+                                continue;
+                            }
+                            
+                            const parts = line.split('|');
+                            if (parts.length === 2) {
+                                const chinese = parts[0].trim();
+                                const lansenLang = parts[1].trim();
+                                if (chinese && lansenLang) {
+                                    importedData[chinese] = lansenLang;
+                                }
+                            }
+                        }
+                        
+                        if (Object.keys(importedData).length === 0) {
+                            alert('TXT文件中没有找到有效的词汇数据\n\n格式应为: 中文|兰森语 (每行一个词汇)');
+                            return;
+                        }
+                    } else {
+                        alert('不支持的文件格式,请选择 .json 或 .txt 文件');
+                        return;
+                    }
+
+                    const currentCount = Object.keys(dictionary).length;
+                    const importCount = Object.keys(importedData).length;
+
+                    if (currentCount > 0) {
+                        const choice = confirm(
+                            `当前词典有 ${currentCount} 个词汇\n` +
+                            `导入文件有 ${importCount} 个词汇\n\n` +
+                            `点击"确定"合并词典(重复词汇将被覆盖)\n` +
+                            `点击"取消"替换整个词典`
+                        );
+
+                        if (choice) {
+                            // Merge dictionaries
+                            dictionary = { ...dictionary, ...importedData };
+                        } else {
+                            // Replace dictionary
+                            dictionary = importedData;
+                        }
+                    } else {
+                        dictionary = importedData;
+                    }
+
+                    saveDictionary();
+                    alert(`导入成功! 当前词典共有 ${Object.keys(dictionary).length} 个词汇`);
+                    
+                    // Clear file input
+                    event.target.value = '';
+                } catch (error) {
+                    alert('文件解析失败,请检查文件格式\n\n' + 
+                          'JSON格式: 标准JSON对象\n' +
+                          'TXT格式: 每行一个词汇,格式为 中文|兰森语');
+                    event.target.value = '';
+                }
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Enter key support for add word
+        document.getElementById('chineseInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('newLangInput').focus();
+            }
+        });
+
+        document.getElementById('newLangInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addWord();
+            }
+        });
+
+        function applyReadOnlyView() {
+            if (!readOnly) return;
+            document.querySelectorAll('[onclick*="openAddModal"], [onclick*="exportDictionary"], [onclick*="importFile"]').forEach((button) => {
+                button.style.display = 'none';
+            });
+        }
+
+        applyReadOnlyView();
+        loadDictionary();
+    </script>
+</body>
+</html>

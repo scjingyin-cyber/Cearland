@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>天坑-卡厄兰</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #667085;
+      --line: rgba(20, 32, 42, 0.14);
+      --panel: rgba(255, 255, 255, 0.86);
+      --paper: #f5f7f8;
+      --accent: #0f766e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(244, 247, 248, 0.96), rgba(233, 238, 236, 0.96)),
+        radial-gradient(circle at 15% 18%, rgba(15, 118, 110, 0.1), transparent 34%),
+        radial-gradient(circle at 82% 12%, rgba(188, 97, 73, 0.1), transparent 30%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 560px;
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .topbar {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      z-index: 5;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    .brand {
+      pointer-events: auto;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4.8vw, 46px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      font-weight: 820;
+    }
+
+    .meta {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      pointer-events: auto;
+      width: min(520px, calc(100vw - 36px));
+      padding: 12px;
+      display: grid;
+      gap: 12px;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: 0 18px 44px rgba(36, 45, 52, 0.16);
+      backdrop-filter: blur(18px);
+      border-radius: 8px;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+      gap: 8px;
+    }
+
+    .swatch {
+      width: 100%;
+      aspect-ratio: 1;
+      min-height: 38px;
+      border: 2px solid rgba(23, 32, 42, 0.1);
+      border-radius: 8px;
+      padding: 0;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+      transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .swatch[aria-pressed="true"] {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(23, 32, 42, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      transform: translateY(-1px);
+    }
+
+    .add-swatch {
+      display: grid;
+      place-items: center;
+      color: rgba(23, 32, 42, 0.72);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(241, 244, 245, 0.78)),
+        repeating-linear-gradient(45deg, rgba(23, 32, 42, 0.07) 0 5px, transparent 5px 10px);
+    }
+
+    .editor {
+      display: grid;
+      grid-template-columns: minmax(92px, 1fr) auto auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .name-field {
+      height: 38px;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 11px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.84);
+      outline: none;
+    }
+
+    .name-field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.84);
+      cursor: pointer;
+      transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+    }
+
+    .icon-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(23, 32, 42, 0.28);
+      background: #fff;
+    }
+
+    .icon-button[aria-pressed="true"] {
+      color: #fff;
+      border-color: rgba(23, 32, 42, 0.18);
+      background: var(--ink);
+      box-shadow: 0 0 0 3px rgba(23, 32, 42, 0.12);
+    }
+
+    .toolbar[aria-disabled="true"] {
+      opacity: 0.58;
+    }
+
+    .toolbar[aria-disabled="true"] button,
+    .toolbar[aria-disabled="true"] input {
+      cursor: not-allowed;
+    }
+
+    .readonly-view .toolbar,
+    .readonly-view .meta,
+    .readonly-view .status {
+      display: none;
+    }
+
+    .readonly-view .topbar {
+      right: auto;
+    }
+
+    .icon {
+      width: 19px;
+      height: 19px;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .status {
+      position: absolute;
+      left: 18px;
+      bottom: 16px;
+      z-index: 4;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      pointer-events: none;
+    }
+
+    .pill {
+      min-height: 30px;
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: 8px;
+      font-size: 12px;
+      color: rgba(23, 32, 42, 0.7);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(12px);
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        min-height: 620px;
+      }
+
+      .topbar {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        display: grid;
+      }
+
+      .toolbar {
+        width: 100%;
+      }
+
+      .meta {
+        white-space: normal;
+      }
+
+      .status {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <canvas id="field" aria-label="三角形颜色地块"></canvas>
+
+    <section class="topbar">
+      <div class="brand">
+        <h1>天坑-卡厄兰</h1>
+        <div class="meta" id="meta">0 个地块已着色</div>
+      </div>
+
+      <div class="toolbar" aria-label="颜色工具">
+        <div class="palette" id="palette"></div>
+        <div class="editor">
+          <input class="name-field" id="colorName" aria-label="颜色名" maxlength="12" autocomplete="off">
+          <button class="icon-button" id="pickColor" type="button" title="更换颜色">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 22a7 7 0 0 0 7-7c0-4.5-7-13-7-13S5 10.5 5 15a7 7 0 0 0 7 7Z"></path>
+            </svg>
+          </button>
+          <button class="icon-button" id="eraser" type="button" title="橡皮擦" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 21h10"></path>
+              <path d="M18.5 10.5 13 5 4.5 13.5a3 3 0 0 0 0 4.2l2.8 2.8h5.4l5.8-5.8a3 3 0 0 0 0-4.2Z"></path>
+              <path d="M9.5 8.5 15.5 14.5"></path>
+            </svg>
+          </button>
+          <button class="icon-button" id="clearAll" type="button" title="清空">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 6h18"></path>
+              <path d="M8 6V4h8v2"></path>
+              <path d="M6 6l1 16h10l1-16"></path>
+              <path d="M10 11v6"></path>
+              <path d="M14 11v6"></path>
+            </svg>
+          </button>
+          <button class="icon-button" id="exportMap" type="button" title="导出地图数据">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12"></path>
+              <path d="M7 10l5 5 5-5"></path>
+              <path d="M5 21h14"></path>
+            </svg>
+          </button>
+          <button class="icon-button" id="importMap" type="button" title="导入地图Markdown">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21V9"></path>
+              <path d="M7 14l5-5 5 5"></path>
+              <path d="M5 3h14"></path>
+            </svg>
+          </button>
+          <input id="nativeColor" type="color" value="#0f766e" hidden>
+          <input id="mapFile" type="file" accept=".md" hidden>
+        </div>
+      </div>
+    </section>
+
+    <div class="status">
+      <span class="pill" id="hoverInfo">悬停: -</span>
+      <span class="pill" id="regionInfo">色块组: 0</span>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.querySelector("#field");
+    const ctx = canvas.getContext("2d");
+    const paletteEl = document.querySelector("#palette");
+    const nameInput = document.querySelector("#colorName");
+    const nativeColor = document.querySelector("#nativeColor");
+    const pickColorButton = document.querySelector("#pickColor");
+    const eraserButton = document.querySelector("#eraser");
+    const clearButton = document.querySelector("#clearAll");
+    const exportMapButton = document.querySelector("#exportMap");
+    const importMapButton = document.querySelector("#importMap");
+    const mapFileInput = document.querySelector("#mapFile");
+    const metaEl = document.querySelector("#meta");
+    const hoverInfo = document.querySelector("#hoverInfo");
+    const regionInfo = document.querySelector("#regionInfo");
+
+    const markdownPath = "../data/map.md";
+    const localDraftKey = "caerland-map-draft-v2";
+    const readOnly = new URLSearchParams(window.location.search).get("readonly") === "1";
+    const basePalette = [
+      { color: "#0f766e", name: "青绿" },
+      { color: "#bc6149", name: "陶土" },
+      { color: "#d39a23", name: "金黄" },
+      { color: "#4169a8", name: "湖蓝" },
+      { color: "#8a5d9f", name: "藤紫" },
+      { color: "#4f6f38", name: "苔绿" }
+    ];
+
+    const state = {
+      palette: structuredClone(basePalette),
+      selected: 0,
+      tool: "paint",
+      isPainting: false,
+      lastPaintedKey: null,
+      cells: new Map(),
+      triangles: [],
+      hoverId: null,
+      pointer: { x: -9999, y: -9999 },
+      dpr: 1,
+      width: 0,
+      height: 0,
+      columns: 0,
+      rows: 0,
+      side: 44,
+      triHeight: 38
+    };
+
+    async function loadState() {
+      try {
+        const draft = !readOnly ? localStorage.getItem(localDraftKey) : null;
+        const saved = draft ? JSON.parse(draft) : await fetchMarkdownJson(markdownPath, { palette: null, cells: {} });
+        if (!saved) return;
+        if (Array.isArray(saved.palette) && saved.palette.length) {
+          state.palette = saved.palette.map((item, index) => ({
+            color: item.color || basePalette[index % basePalette.length].color,
+            name: item.name || basePalette[index % basePalette.length].name
+          }));
+        }
+        if (saved.cells && typeof saved.cells === "object") {
+          state.cells = new Map(Object.entries(saved.cells).map(([key, value]) => [key, Number(value)]));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function saveState() {
+      if (readOnly) return;
+      localStorage.setItem(localDraftKey, JSON.stringify(currentMapData()));
+    }
+
+    function currentMapData() {
+      return {
+        palette: state.palette,
+        cells: Object.fromEntries(state.cells.entries())
+      };
+    }
+
+    async function fetchMarkdownJson(url, fallback) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`无法读取 ${url}`);
+      return parseMarkdownJson(await response.text(), fallback);
+    }
+
+    function parseMarkdownJson(markdown, fallback) {
+      const match = markdown.match(/```json\s*([\s\S]*?)\s*```/i);
+      if (!match) return fallback;
+      return JSON.parse(match[1]);
+    }
+
+    function markdownFor(title, data) {
+      return `# ${title}\n\nStatic data for GitHub Pages.\n\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\`\n`;
+    }
+
+    function downloadMarkdown(fileName, title, data) {
+      const blob = new Blob([markdownFor(title, data)], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resize() {
+      state.dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      state.width = window.innerWidth;
+      state.height = window.innerHeight;
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      canvas.style.width = `${state.width}px`;
+      canvas.style.height = `${state.height}px`;
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+
+      const density = state.width < 760 ? 34 : 42;
+      state.side = density;
+      state.triHeight = Math.sin(Math.PI / 3) * density;
+      state.columns = Math.ceil(state.width / (state.side / 2)) + 4;
+      state.rows = Math.ceil(state.height / state.triHeight) + 4;
+      buildTriangles();
+      render();
+    }
+
+    function buildTriangles() {
+      state.triangles = [];
+      const half = state.side / 2;
+      const height = state.triHeight;
+      let id = 0;
+
+      for (let row = -2; row < state.rows; row++) {
+        for (let col = -2; col < state.columns; col++) {
+          const x = col * half;
+          const y = row * height;
+          const up = (row + col) % 2 === 0;
+          const points = up
+            ? [{ x, y: y + height }, { x: x + half, y }, { x: x + state.side, y: y + height }]
+            : [{ x, y }, { x: x + state.side, y }, { x: x + half, y: y + height }];
+          const center = {
+            x: (points[0].x + points[1].x + points[2].x) / 3,
+            y: (points[0].y + points[1].y + points[2].y) / 3
+          };
+          const key = `${row}:${col}`;
+          state.triangles.push({ id: id++, key, row, col, up, points, center });
+        }
+      }
+    }
+
+    function drawTriangle(triangle, fill, stroke, scale) {
+      const center = triangle.center;
+      ctx.beginPath();
+      triangle.points.forEach((point, index) => {
+        const x = center.x + (point.x - center.x) * scale;
+        const y = center.y + (point.y - center.y) * scale;
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = scale > 1.02 ? 1.35 : 0.8;
+      ctx.stroke();
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, state.width, state.height);
+      ctx.fillStyle = "#f6f8f8";
+      ctx.fillRect(0, 0, state.width, state.height);
+
+      for (const triangle of state.triangles) {
+        const paletteIndex = state.cells.get(triangle.key);
+        const color = paletteIndex !== undefined ? state.palette[paletteIndex]?.color : null;
+        const distance = Math.hypot(triangle.center.x - state.pointer.x, triangle.center.y - state.pointer.y);
+        const lift = Math.max(0, 1 - distance / 145);
+        const scale = 1 + Math.pow(lift, 1.35) * 0.34;
+        const fill = color ? withAlpha(color, 0.82) : "rgba(255, 255, 255, 0.44)";
+        const stroke = color ? withAlpha(darken(color, 0.48), 0.42) : "rgba(40, 52, 58, 0.13)";
+        drawTriangle(triangle, fill, stroke, scale);
+      }
+
+      drawRegionNames();
+      updateStats();
+    }
+
+    function withAlpha(hex, alpha) {
+      const rgb = hexToRgb(hex);
+      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+    }
+
+    function darken(hex, amount) {
+      const rgb = hexToRgb(hex);
+      const mix = (value) => Math.max(0, Math.round(value * amount));
+      return rgbToHex(mix(rgb.r), mix(rgb.g), mix(rgb.b));
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace("#", "");
+      const value = parseInt(clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean, 16);
+      return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
+    }
+
+    function rgbToHex(r, g, b) {
+      return `#${[r, g, b].map((value) => value.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    function drawRegionNames() {
+      const groups = findColorGroups();
+      regionInfo.textContent = `色块组: ${groups.length}`;
+      for (const group of groups) {
+        const item = state.palette[group.paletteIndex];
+        if (!item?.name) continue;
+
+        const center = groupCenter(group.cells);
+        ctx.save();
+        ctx.font = "700 14px Microsoft YaHei, PingFang SC, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const label = item.name.slice(0, 12);
+        const metrics = ctx.measureText(label);
+        const paddingX = 9;
+        const width = metrics.width + paddingX * 2;
+        const height = 26;
+        const x = clamp(center.x - width / 2, 8, state.width - width - 8);
+        const y = clamp(center.y - height / 2, 72, state.height - height - 20);
+        roundRect(x, y, width, height, 8);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
+        ctx.fill();
+        ctx.strokeStyle = withAlpha(darken(item.color, 0.45), 0.34);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = darken(item.color, 0.38);
+        ctx.fillText(label, x + width / 2, y + height / 2 + 0.5);
+        ctx.restore();
+      }
+    }
+
+    function roundRect(x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function findColorGroups() {
+      const byKey = new Map(state.triangles.map((triangle) => [triangle.key, triangle]));
+      const visited = new Set();
+      const groups = [];
+
+      for (const [key, paletteIndex] of state.cells.entries()) {
+        if (visited.has(key) || !byKey.has(key)) continue;
+        const stack = [key];
+        const cells = [];
+        visited.add(key);
+
+        while (stack.length) {
+          const current = stack.pop();
+          const triangle = byKey.get(current);
+          if (!triangle) continue;
+          cells.push(triangle);
+
+          for (const nextKey of neighborKeys(triangle)) {
+            if (visited.has(nextKey)) continue;
+            if (state.cells.get(nextKey) !== paletteIndex) continue;
+            visited.add(nextKey);
+            stack.push(nextKey);
+          }
+        }
+
+        groups.push({ paletteIndex, cells });
+      }
+
+      return groups;
+    }
+
+    function neighborKeys(triangle) {
+      const { row, col, up } = triangle;
+      const vertical = up ? row - 1 : row + 1;
+      return [`${row}:${col - 1}`, `${row}:${col + 1}`, `${vertical}:${col}`];
+    }
+
+    function groupCenter(cells) {
+      let totalWeight = 0;
+      let x = 0;
+      let y = 0;
+      for (const cell of cells) {
+        const weight = Math.max(1, 220 - Math.hypot(cell.center.x - state.width / 2, cell.center.y - state.height / 2) * 0.02);
+        totalWeight += weight;
+        x += cell.center.x * weight;
+        y += cell.center.y * weight;
+      }
+      return { x: x / totalWeight, y: y / totalWeight };
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function locateTriangle(x, y) {
+      let nearest = null;
+      let nearestDistance = Infinity;
+      for (const triangle of state.triangles) {
+        const d = Math.hypot(triangle.center.x - x, triangle.center.y - y);
+        if (d < nearestDistance) {
+          nearestDistance = d;
+          nearest = triangle;
+        }
+      }
+      return nearest && pointInTriangle({ x, y }, nearest.points) ? nearest : null;
+    }
+
+    function pointInTriangle(point, points) {
+      const [a, b, c] = points;
+      const area = triangleArea(a, b, c);
+      const a1 = triangleArea(point, b, c);
+      const a2 = triangleArea(a, point, c);
+      const a3 = triangleArea(a, b, point);
+      return Math.abs(area - (a1 + a2 + a3)) < 0.8;
+    }
+
+    function triangleArea(a, b, c) {
+      return Math.abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2);
+    }
+
+    function setSelected(index) {
+      if (readOnly) return;
+      state.selected = index;
+      state.tool = "paint";
+      nameInput.value = state.palette[index].name;
+      nativeColor.value = state.palette[index].color;
+      renderPalette();
+      updateToolState();
+      render();
+    }
+
+    function addColor() {
+      if (readOnly) return;
+      const nextIndex = state.palette.length + 1;
+      const color = niceColor(nextIndex);
+      state.palette.push({ color, name: `颜色${nextIndex}` });
+      state.selected = state.palette.length - 1;
+      state.tool = "paint";
+      saveState();
+      setSelected(state.selected);
+    }
+
+    function niceColor(seed) {
+      const hue = (seed * 47 + 12) % 360;
+      return hslToHex(hue, 62, 56);
+    }
+
+    function hslToHex(h, s, l) {
+      s /= 100;
+      l /= 100;
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+      const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+      return rgbToHex(Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255));
+    }
+
+    function setEraser(enabled) {
+      if (readOnly) return;
+      state.tool = enabled ? "erase" : "paint";
+      updateToolState();
+      renderPalette();
+      render();
+    }
+
+    function updateToolState() {
+      const erasing = state.tool === "erase";
+      eraserButton.setAttribute("aria-pressed", String(erasing));
+      nameInput.disabled = erasing;
+      pickColorButton.disabled = erasing;
+      if (readOnly) {
+        nameInput.disabled = true;
+        pickColorButton.disabled = true;
+        eraserButton.disabled = true;
+        clearButton.disabled = true;
+        exportMapButton.disabled = true;
+        importMapButton.disabled = true;
+        document.querySelector(".toolbar").setAttribute("aria-disabled", "true");
+      }
+      canvas.style.cursor = erasing ? "cell" : "crosshair";
+      if (readOnly) canvas.style.cursor = "default";
+    }
+
+    function applyReadOnlyView() {
+      if (!readOnly) return;
+      document.body.classList.add("readonly-view");
+      document.querySelector(".toolbar").setAttribute("aria-hidden", "true");
+      document.querySelector(".status").setAttribute("aria-hidden", "true");
+    }
+
+    function renderPalette() {
+      paletteEl.innerHTML = "";
+      state.palette.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.className = "swatch";
+        button.type = "button";
+        button.style.background = item.color;
+        button.title = item.name;
+        button.setAttribute("aria-label", item.name);
+        button.setAttribute("aria-pressed", String(index === state.selected));
+        button.disabled = readOnly;
+        button.addEventListener("click", () => setSelected(index));
+        paletteEl.appendChild(button);
+      });
+      const addButton = document.createElement("button");
+      addButton.className = "swatch add-swatch";
+      addButton.type = "button";
+      addButton.title = "添加颜色";
+      addButton.setAttribute("aria-label", "添加颜色");
+      addButton.setAttribute("aria-pressed", "false");
+      addButton.disabled = readOnly;
+      addButton.innerHTML = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>`;
+      addButton.addEventListener("click", addColor);
+      paletteEl.appendChild(addButton);
+    }
+
+    function paintAt(x, y) {
+      if (readOnly) return;
+      const triangle = locateTriangle(x, y);
+      if (!triangle || triangle.key === state.lastPaintedKey) return;
+      state.lastPaintedKey = triangle.key;
+      if (state.tool === "erase") state.cells.delete(triangle.key);
+      else state.cells.set(triangle.key, state.selected);
+      saveState();
+      render();
+    }
+
+    function updateStats() {
+      const colored = state.cells.size;
+      const hover = state.hoverId === null ? "-" : state.hoverId;
+      metaEl.textContent = `${colored} 个地块已着色`;
+      hoverInfo.textContent = `悬停: ${hover}`;
+    }
+
+    canvas.addEventListener("pointermove", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      state.pointer.x = event.clientX - rect.left;
+      state.pointer.y = event.clientY - rect.top;
+      const triangle = locateTriangle(state.pointer.x, state.pointer.y);
+      state.hoverId = triangle?.key ?? null;
+      if (state.isPainting) paintAt(state.pointer.x, state.pointer.y);
+      render();
+    });
+
+    canvas.addEventListener("pointerleave", () => {
+      state.pointer.x = -9999;
+      state.pointer.y = -9999;
+      state.hoverId = null;
+      state.isPainting = false;
+      state.lastPaintedKey = null;
+      render();
+    });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      if (readOnly) return;
+      const rect = canvas.getBoundingClientRect();
+      state.isPainting = true;
+      state.lastPaintedKey = null;
+      canvas.setPointerCapture(event.pointerId);
+      paintAt(event.clientX - rect.left, event.clientY - rect.top);
+    });
+
+    canvas.addEventListener("pointerup", () => {
+      state.isPainting = false;
+      state.lastPaintedKey = null;
+    });
+
+    canvas.addEventListener("pointercancel", () => {
+      state.isPainting = false;
+      state.lastPaintedKey = null;
+    });
+
+    nameInput.addEventListener("input", () => {
+      if (readOnly) return;
+      state.palette[state.selected].name = nameInput.value.trim() || "未命名";
+      saveState();
+      renderPalette();
+      render();
+    });
+
+    nativeColor.addEventListener("input", () => {
+      if (readOnly) return;
+      state.palette[state.selected].color = nativeColor.value;
+      saveState();
+      renderPalette();
+      render();
+    });
+
+    pickColorButton.addEventListener("click", () => nativeColor.click());
+
+    eraserButton.addEventListener("click", () => {
+      setEraser(state.tool !== "erase");
+    });
+
+    clearButton.addEventListener("click", () => {
+      if (readOnly) return;
+      state.cells.clear();
+      saveState();
+      render();
+    });
+
+    exportMapButton.addEventListener("click", () => {
+      if (readOnly) return;
+      saveState();
+      downloadMarkdown("map.md", "Map Data", currentMapData());
+    });
+
+    importMapButton.addEventListener("click", () => {
+      if (readOnly) return;
+      mapFileInput.click();
+    });
+
+    mapFileInput.addEventListener("change", async () => {
+      if (readOnly || !mapFileInput.files[0]) return;
+      const imported = parseMarkdownJson(await mapFileInput.files[0].text(), { palette: null, cells: {} });
+      if (Array.isArray(imported.palette) && imported.palette.length) state.palette = imported.palette;
+      state.cells = new Map(Object.entries(imported.cells || {}).map(([key, value]) => [key, Number(value)]));
+      saveState();
+      renderPalette();
+      setSelected(0);
+      resize();
+      mapFileInput.value = "";
+    });
+
+    window.addEventListener("resize", resize);
+
+    (async function init() {
+      await loadState();
+      applyReadOnlyView();
+      renderPalette();
+      setSelected(0);
+      if (readOnly) updateToolState();
+      resize();
+    })();
+  </script>
+</body>
+</html>
