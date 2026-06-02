@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>天坑-卡厄兰</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
+
     :root {
-      --ink: #17202a;
-      --muted: #667085;
-      --line: rgba(20, 32, 42, 0.14);
-      --panel: rgba(255, 255, 255, 0.86);
-      --paper: #f5f7f8;
-      --accent: #0f766e;
+      --ink: #2c1a0e;
+      --muted: #7a5c3a;
+      --line: rgba(80, 45, 15, 0.22);
+      --panel: rgba(42, 28, 14, 0.82);
+      --paper: #1e1208;
+      --accent: #c8943a;
+      --gold: #d4a843;
+      --parchment: #e8d5a3;
+      --border-dark: #5c3a1a;
     }
 
     * {
@@ -24,12 +29,9 @@
       height: 100%;
       margin: 0;
       overflow: hidden;
-      color: var(--ink);
-      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
-      background:
-        linear-gradient(135deg, rgba(244, 247, 248, 0.96), rgba(233, 238, 236, 0.96)),
-        radial-gradient(circle at 15% 18%, rgba(15, 118, 110, 0.1), transparent 34%),
-        radial-gradient(circle at 82% 12%, rgba(188, 97, 73, 0.1), transparent 30%);
+      color: var(--parchment);
+      font-family: "IM Fell English", "Microsoft YaHei", "PingFang SC", "Times New Roman", serif;
+      background: #0e0a04;
     }
 
     button,
@@ -74,31 +76,65 @@
 
     h1 {
       margin: 0;
-      font-size: clamp(24px, 4.8vw, 46px);
-      line-height: 0.95;
-      letter-spacing: 0;
-      font-weight: 820;
+      font-size: clamp(22px, 4.2vw, 42px);
+      line-height: 1.0;
+      letter-spacing: 0.04em;
+      font-weight: normal;
+      color: var(--gold);
+      text-shadow:
+        0 0 18px rgba(212, 168, 67, 0.55),
+        0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    /* Decorative divider under title */
+    .brand::after {
+      content: "⸻✦⸻";
+      display: block;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      margin-top: 4px;
+      opacity: 0.7;
     }
 
     .meta {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--muted);
+      margin-top: 6px;
+      font-size: 12px;
+      color: #a07850;
       white-space: nowrap;
+      font-style: italic;
     }
 
     .toolbar {
       pointer-events: auto;
       width: min(520px, calc(100vw - 36px));
-      padding: 12px;
+      padding: 14px;
       display: grid;
       gap: 12px;
-      background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.72);
-      box-shadow: 0 18px 44px rgba(36, 45, 52, 0.16);
-      backdrop-filter: blur(18px);
-      border-radius: 8px;
+      background:
+        linear-gradient(160deg, rgba(38, 22, 8, 0.95), rgba(28, 15, 5, 0.97));
+      border: 1px solid var(--border-dark);
+      border-top: 2px solid var(--gold);
+      box-shadow:
+        0 0 0 1px rgba(212, 168, 67, 0.15),
+        0 20px 50px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(212, 168, 67, 0.12);
+      border-radius: 2px;
+      position: relative;
     }
+
+    /* Corner ornaments on toolbar */
+    .toolbar::before,
+    .toolbar::after {
+      content: "✦";
+      position: absolute;
+      top: 6px;
+      font-size: 9px;
+      color: var(--gold);
+      opacity: 0.6;
+    }
+    .toolbar::before { left: 8px; }
+    .toolbar::after { right: 8px; }
 
     .palette {
       display: grid;
@@ -109,28 +145,28 @@
     .swatch {
       width: 100%;
       aspect-ratio: 1;
-      min-height: 38px;
-      border: 2px solid rgba(23, 32, 42, 0.1);
-      border-radius: 8px;
+      min-height: 36px;
+      border: 1px solid rgba(212, 168, 67, 0.25);
+      border-radius: 2px;
       padding: 0;
       cursor: pointer;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
       transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
     }
 
     .swatch[aria-pressed="true"] {
-      border-color: var(--ink);
-      box-shadow: 0 0 0 3px rgba(23, 32, 42, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(212, 168, 67, 0.4), 0 0 8px rgba(212, 168, 67, 0.3), inset 0 0 0 1px rgba(255, 220, 100, 0.3);
       transform: translateY(-1px);
     }
 
     .add-swatch {
       display: grid;
       place-items: center;
-      color: rgba(23, 32, 42, 0.72);
+      color: var(--gold);
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(241, 244, 245, 0.78)),
-        repeating-linear-gradient(45deg, rgba(23, 32, 42, 0.07) 0 5px, transparent 5px 10px);
+        linear-gradient(135deg, rgba(50, 30, 8, 0.8), rgba(35, 20, 5, 0.8)),
+        repeating-linear-gradient(45deg, rgba(212, 168, 67, 0.04) 0 4px, transparent 4px 8px);
     }
 
     .editor {
@@ -141,49 +177,52 @@
     }
 
     .name-field {
-      height: 38px;
+      height: 36px;
       min-width: 0;
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      border: 1px solid var(--border-dark);
+      border-radius: 2px;
       padding: 0 11px;
-      color: var(--ink);
-      background: rgba(255, 255, 255, 0.84);
+      color: var(--parchment);
+      background: rgba(20, 10, 3, 0.85);
       outline: none;
+      font-family: inherit;
+      font-style: italic;
     }
 
     .name-field:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(212, 168, 67, 0.2), 0 0 8px rgba(212, 168, 67, 0.15);
     }
 
     .icon-button {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       display: inline-grid;
       place-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      color: var(--ink);
-      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--border-dark);
+      border-radius: 2px;
+      color: var(--parchment);
+      background: linear-gradient(160deg, rgba(50, 28, 8, 0.9), rgba(30, 16, 4, 0.95));
       cursor: pointer;
       transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
     }
 
     .icon-button:hover {
       transform: translateY(-1px);
-      border-color: rgba(23, 32, 42, 0.28);
-      background: #fff;
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 8px rgba(212, 168, 67, 0.25);
     }
 
     .icon-button[aria-pressed="true"] {
-      color: #fff;
-      border-color: rgba(23, 32, 42, 0.18);
-      background: var(--ink);
-      box-shadow: 0 0 0 3px rgba(23, 32, 42, 0.12);
+      color: var(--gold);
+      border-color: var(--gold);
+      background: linear-gradient(160deg, rgba(80, 45, 10, 0.95), rgba(50, 28, 5, 0.98));
+      box-shadow: 0 0 0 2px rgba(212, 168, 67, 0.25), 0 0 10px rgba(212, 168, 67, 0.2);
     }
 
     .toolbar[aria-disabled="true"] {
-      opacity: 0.58;
+      opacity: 0.45;
     }
 
     .toolbar[aria-disabled="true"] button,
@@ -223,16 +262,16 @@
     }
 
     .pill {
-      min-height: 30px;
-      padding: 6px 10px;
+      min-height: 28px;
+      padding: 5px 10px;
       display: inline-flex;
       align-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.65);
-      border-radius: 8px;
+      border: 1px solid rgba(212, 168, 67, 0.2);
+      border-radius: 2px;
       font-size: 12px;
-      color: rgba(23, 32, 42, 0.7);
-      background: rgba(255, 255, 255, 0.72);
-      backdrop-filter: blur(12px);
+      color: #a07850;
+      background: rgba(20, 10, 3, 0.78);
+      font-style: italic;
     }
 
     @media (max-width: 760px) {
@@ -490,8 +529,18 @@
 
     function render() {
       ctx.clearRect(0, 0, state.width, state.height);
-      ctx.fillStyle = "#f6f8f8";
+
+      // Dark parchment / aged map background
+      ctx.fillStyle = "#0e0905";
       ctx.fillRect(0, 0, state.width, state.height);
+
+      // Vignette overlay
+      const vignette = ctx.createRadialGradient(
+        state.width / 2, state.height / 2, state.height * 0.2,
+        state.width / 2, state.height / 2, state.height * 0.85
+      );
+      vignette.addColorStop(0, "rgba(0,0,0,0)");
+      vignette.addColorStop(1, "rgba(0,0,0,0.65)");
 
       for (const triangle of state.triangles) {
         const paletteIndex = state.cells.get(triangle.key);
@@ -499,10 +548,18 @@
         const distance = Math.hypot(triangle.center.x - state.pointer.x, triangle.center.y - state.pointer.y);
         const lift = Math.max(0, 1 - distance / 145);
         const scale = 1 + Math.pow(lift, 1.35) * 0.34;
-        const fill = color ? withAlpha(color, 0.82) : "rgba(255, 255, 255, 0.44)";
-        const stroke = color ? withAlpha(darken(color, 0.48), 0.42) : "rgba(40, 52, 58, 0.13)";
+        const fill = color
+          ? withAlpha(color, 0.78)
+          : "rgba(30, 18, 7, 0.55)";
+        const stroke = color
+          ? withAlpha(darken(color, 0.38), 0.55)
+          : "rgba(212, 168, 67, 0.07)";
         drawTriangle(triangle, fill, stroke, scale);
       }
+
+      // Apply vignette on top
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, state.width, state.height);
 
       drawRegionNames();
       updateStats();
@@ -538,23 +595,29 @@
 
         const center = groupCenter(group.cells);
         ctx.save();
-        ctx.font = "700 14px Microsoft YaHei, PingFang SC, sans-serif";
+        ctx.font = "italic 700 13px 'IM Fell English', 'Microsoft YaHei', serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const label = item.name.slice(0, 12);
         const metrics = ctx.measureText(label);
-        const paddingX = 9;
+        const paddingX = 10;
         const width = metrics.width + paddingX * 2;
-        const height = 26;
+        const height = 24;
         const x = clamp(center.x - width / 2, 8, state.width - width - 8);
         const y = clamp(center.y - height / 2, 72, state.height - height - 20);
-        roundRect(x, y, width, height, 8);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
+
+        // Parchment-style label background
+        roundRect(x, y, width, height, 1);
+        ctx.fillStyle = "rgba(18, 10, 3, 0.82)";
         ctx.fill();
-        ctx.strokeStyle = withAlpha(darken(item.color, 0.45), 0.34);
+        ctx.strokeStyle = withAlpha(darken(item.color, 0.55), 0.65);
         ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.fillStyle = darken(item.color, 0.38);
+
+        // Gold text
+        ctx.fillStyle = "#d4a843";
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 3;
         ctx.fillText(label, x + width / 2, y + height / 2 + 0.5);
         ctx.restore();
       }
