@@ -410,6 +410,15 @@
       triHeight: 38
     };
 
+    // Intro animation state
+    const anim = {
+      running: false,
+      startTime: 0,
+      duration: 1600,   // total animation ms
+      waveDuration: 900, // each triangle's own fade-in duration ms
+      maxDist: 0        // max distance from center, set after buildTriangles
+    };
+
     async function loadState() {
       try {
         const draft = !readOnly ? localStorage.getItem(localDraftKey) : null;
@@ -483,7 +492,7 @@
       state.columns = Math.ceil(state.width / (state.side / 2)) + 4;
       state.rows = Math.ceil(state.height / state.triHeight) + 4;
       buildTriangles();
-      render();
+      if (!anim.running) render();
     }
 
     function buildTriangles() {
@@ -508,6 +517,16 @@
           state.triangles.push({ id: id++, key, row, col, up, points, center });
         }
       }
+
+      // Compute distance of each triangle from screen center for wave animation
+      const cx = state.width / 2;
+      const cy = state.height / 2;
+      let maxDist = 0;
+      for (const t of state.triangles) {
+        t.distFromCenter = Math.hypot(t.center.x - cx, t.center.y - cy);
+        if (t.distFromCenter > maxDist) maxDist = t.distFromCenter;
+      }
+      anim.maxDist = maxDist;
     }
 
     function drawTriangle(triangle, fill, stroke, scale) {
@@ -542,12 +561,41 @@
       vignette.addColorStop(0, "rgba(0,0,0,0)");
       vignette.addColorStop(1, "rgba(0,0,0,0.65)");
 
+      // Determine animation progress
+      const now = performance.now();
+      const animElapsed = anim.running ? now - anim.startTime : Infinity;
+      const animDone = animElapsed >= anim.duration + anim.waveDuration;
+
       for (const triangle of state.triangles) {
+        // Per-triangle intro scale
+        let introScale = 1;
+        if (!animDone) {
+          // Wave front: each triangle starts fading in based on its distance from center
+          const waveDelay = (triangle.distFromCenter / anim.maxDist) * anim.duration;
+          const localT = (animElapsed - waveDelay) / anim.waveDuration;
+          if (localT <= 0) {
+            introScale = 0;
+          } else if (localT < 1) {
+            // Ease out elastic-ish: overshoot then settle
+            const t = Math.min(localT, 1);
+            const ease = 1 - Math.pow(1 - t, 3);
+            // Slight overshoot bounce
+            introScale = ease < 0.85
+              ? ease * 1.18
+              : 1 + (1 - ease) * 0.18;
+            introScale = Math.max(0, introScale);
+          }
+        }
+
+        if (introScale === 0) continue;
+
         const paletteIndex = state.cells.get(triangle.key);
         const color = paletteIndex !== undefined ? state.palette[paletteIndex]?.color : null;
         const distance = Math.hypot(triangle.center.x - state.pointer.x, triangle.center.y - state.pointer.y);
         const lift = Math.max(0, 1 - distance / 145);
-        const scale = 1 + Math.pow(lift, 1.35) * 0.34;
+        const hoverScale = 1 + Math.pow(lift, 1.35) * 0.34;
+        const scale = introScale * hoverScale;
+
         const fill = color
           ? withAlpha(color, 0.78)
           : "rgba(30, 18, 7, 0.55)";
@@ -563,6 +611,13 @@
 
       drawRegionNames();
       updateStats();
+
+      // Continue animation loop if still running
+      if (!animDone) {
+        requestAnimationFrame(render);
+      } else {
+        anim.running = false;
+      }
     }
 
     function withAlpha(hex, alpha) {
@@ -931,6 +986,10 @@
       setSelected(0);
       if (readOnly) updateToolState();
       resize();
+      // Kick off entrance animation
+      anim.running = true;
+      anim.startTime = performance.now();
+      requestAnimationFrame(render);
     })();
   </script>
 </body>
